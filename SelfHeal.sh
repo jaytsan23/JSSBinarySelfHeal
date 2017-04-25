@@ -43,12 +43,13 @@
 jssUrl="" # ex. https://jamit.q.jamfsw.corp:8443 - Please include the port if used
 enrollInv="" # Invitation ID from a quickadd package
 logFile="/Users/Shared/enrollLog.log"
-check=`/usr/local/bin/jamf checkJSSConnection | rev | cut -c 2- | rev | grep "The JSS is available"`
+check=$(/usr/local/bin/jamf checkJSSConnection | rev | cut -c 2- | rev | grep "The JSS is available")
 quickLocation="/tmp/quickadd.zip"
-log=`/usr/local/bin/jamf log | rev | cut -c 5- | rev`
-policy=`/usr/local/bin/jamf policy -event heal | grep "Script result: heal" | cut -d " " -f3`
+log=$(/usr/local/bin/jamf log | rev | cut -c 5- | rev)
+policy=$(/usr/local/bin/jamf policy -event heal | grep "Script result: heal" | cut -d " " -f3)
 mdmEnrollmentProfileID="00000000-0000-0000-A000-4A414D460003"
-enrolled=`/usr/bin/profiles -P | /usr/bin/grep "$mdmEnrollmentProfileID"`
+enrolled=$(/usr/bin/profiles -P | /usr/bin/grep "$mdmEnrollmentProfileID")
+jamf_size=$(du -ks /usr/local/jamf/bin/jamf | awk '{ print $1 }')
 
 addDate(){
 	while IFS= read -r line; do
@@ -117,8 +118,7 @@ if [[ ! -f /usr/local/jamf/bin/jamf ]]; then
 fi
 # Checks the size of the jamf binary, and if it abnormally small, reinstall the binary and enroll the client
 # Checks if the file is at least 1M in size
-if [ $jamf_size -le 1000 ]; then
-	 	jamf_size=$(du -ks /usr/local/jamf/bin/jamf | awk '{ print $1 }')
+if [ $jamf_size -le 1000 ]; then       
 		echo "Jamf binary is $jamf_size bytes ...." | addDate >> $logFile;
 		echo "Jamf binary is abnormally small. Reinstalling ...." | addDate >> $logFile;
         	echo "Downloading the quickadd package from the JSS ...." | addDate >> $logFile;
@@ -169,7 +169,7 @@ if [[ "$enrolled" != "" ]]; then
 fi
 
 # Clean up archived logs when 10 rollovers occur
-number=`ls /Users/Shared/log_archive/* | wc -l`
+number=$(ls /Users/Shared/log_archive/* | wc -l)
 
 if [ ${number} -ge 5 ]; then
 	echo "Deleting archived logs as we are now at 5" | addDate >> $logFile;
