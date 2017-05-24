@@ -50,7 +50,7 @@ policy=$(/usr/local/bin/jamf policy -event heal | grep "Script result: heal" | c
 mdmEnrollmentProfileID="00000000-0000-0000-A000-4A414D460003"
 enrolled=$(/usr/bin/profiles -P | /usr/bin/grep "$mdmEnrollmentProfileID")
 jamf_size=$(du -ks /usr/local/jamf/bin/jamf | awk '{ print $1 }')
-jamfVersion=$(/usr/local/jamf/bin/jamf version | cut -f2 -d"=")
+jamfVersion=$(/usr/local/jamf/bin/jamf version | cut -f2 -d"=" | grep -e "[0-9]")
 
 addDate(){
 	while IFS= read -r line; do
@@ -62,6 +62,8 @@ addDate(){
 ########## Create New Day Line ##########
 /bin/echo "*******************************************************************************************************************************************************" >> $logFile;
 /bin/echo "                                                    Today's Date:  $(date +"%A %B %d, %Y")                                                                           " >> $logFile;
+/bin/echo "                                                    Jamf Binary Version: $jamfVersion                                                                           " >> $logFile;
+/bin/echo "" >> $logFile;
 /bin/echo "" >> $logFile;
 
 # Create enrollLog if it doesn't exisit
@@ -139,14 +141,6 @@ if [ $jamf_size -le 1000 ]; then
 		rm -rf /tmp/_* | addDate >> $logFile;
 	else 
 		echo "JAMF binary is installed .... nothing to do" | addDate >> $logFile;
-fi
-
-# Verify Jamf Binary Version On The Client
-if [ "$jamfVersion" != "" ]; then
-	/bin/echo "Jamf client binary version = $jamfVersion" | addDate >> $logFile;
-else
-	/bin/echo "Jamf client binary version not found, reenrolling client now ..." | addDate >> $logFile;
-	/usr/local/jamf/binjamf enroll -invitation $enrollInv -noPolicy | addDate >> $logFile;
 fi
 
 # Check to see if the client to check in with the JSS, if not, enroll the client
