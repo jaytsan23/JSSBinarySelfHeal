@@ -40,3 +40,19 @@ Date 5-24-2017
 
 1) I have added some new changes to the Self Heal process.  I have added an echo of the jamf client binary version.  We will now see the version of the binary in the Self Heal log.
 2) I add the -noPolicy flag to the reenroll calls using the invite code.  This should help out with managed devices not trying to run enrollment complete policies when they need to be reenrolled.
+
+Date 5-24-2017
+
+I added date headers and separation between days to make reading the log much easier and cleaner.  There is now a border around the entries to separate by date which includes the date.  Example of the new view is below
+
+**************************************************************************************************************************
+                                                  
+                                                                                Todays Date: 05/24/2017
+
+date: Log entry
+date: Log entry
+date: Log entry
+date: Log entry
+date: Log entry
+
+**************************************************************************************************************************
