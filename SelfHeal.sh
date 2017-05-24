@@ -101,6 +101,11 @@ fi
 
 sleep 5
 
+########## Create New Day Line ##########
+/bin/echo "*******************************************************************************************************************************************************" >> $logFile;
+/bin/echo "                                                    Today's Date:  $(date +"%A %B %d, %Y")                                                                           " >> $logFile;
+/bin/echo "" >> $logFile;
+
 # Check to see if binary exists if not install it, if not, install the binary and eroll the client
 # Check if the binary exists and get the size in 1K blocks (should be over 5K)
 if [[ ! -f /usr/local/jamf/bin/jamf ]]; then
@@ -186,3 +191,6 @@ if [ ${number} -ge 5 ]; then
 else
 	echo "There are currently "${number}" archived logs on this client.  When we reach 5, the latest archive log will be kept as the rest will be deleted." | addDate >> $logFile;
 fi
+
+/bin/echo "" >> $logFile;
+/bin/echo "*******************************************************************************************************************************************************" >> $logFile;
