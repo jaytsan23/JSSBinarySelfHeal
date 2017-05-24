@@ -50,6 +50,7 @@ policy=$(/usr/local/bin/jamf policy -event heal | grep "Script result: heal" | c
 mdmEnrollmentProfileID="00000000-0000-0000-A000-4A414D460003"
 enrolled=$(/usr/bin/profiles -P | /usr/bin/grep "$mdmEnrollmentProfileID")
 jamf_size=$(du -ks /usr/local/jamf/bin/jamf | awk '{ print $1 }')
+jamfVersion=$(/usr/local/jamf/bin/jamf version | cut -f2 -d"=")
 
 addDate(){
 	while IFS= read -r line; do
@@ -136,12 +137,20 @@ if [ $jamf_size -le 1000 ]; then
 		echo "JAMF binary is installed .... nothing to do" | addDate >> $logFile;
 fi
 
+# Verify Jamf Binary Version On The Client
+if [ "$jamfVersion" != "" ]; then
+	/bin/echo "Jamf client binary version = $jamfVersion" | addDate >> $logFile;
+else
+	/bin/echo "Jamf client binary version not found, reenrolling client now ..." | addDate >> $logFile;
+	/usr/local/jamf/binjamf enroll -invitation $enrollInv -noPolicy | addDate >> $logFile;
+fi
+
 # Check to see if the client to check in with the JSS, if not, enroll the client
 if [[ ${check} == "The JSS is available" ]]; then
 		echo "Client can successfully check in with the JSS" | addDate >> $logFile;
 	else 
 		jamf createConf -k -url $jssUrl | addDate >> $logFile;
-		/usr/local/bin/jamf enroll -invitation $enrollInv | addDate >> $logFile;
+		/usr/local/bin/jamf enroll -invitation $enrollInv -noPolicy | addDate >> $logFile;
 fi
 
 # Can the client log it's IP address with the JSS, if not, enroll the client
@@ -149,7 +158,7 @@ if [[ ${log} == "Logging to $jssUrl" ]]; then
 		echo "Client can log IP address with JSS" | addDate >> $logFile
 	else 
 		jamf createConf -k -url $jssUrl | addDate >> $logFile;
-		/usr/local/bin/jamf enroll -invitation $enrollInv | addDate >> $logFile;
+		/usr/local/bin/jamf enroll -invitation $enrollInv -noPolicy | addDate >> $logFile;
 fi
 
 # Can the client execute a policy, if not, enroll the client
@@ -157,7 +166,7 @@ if [[ ${policy} == "heal" ]]; then
 		echo "Client can execute policies at this time" | addDate >> $logFile;
 	else 
 		jamf createConf -k -url $jssUrl | addDate >> $logFile;
-		/usr/local/bin/jamf enroll -invitation $enrollInv | addDate >> $logFile;
+		/usr/local/bin/jamf enroll -invitation $enrollInv -noPolicy | addDate >> $logFile;
 fi
 
 # Does the client have it's MDM profile, if not, issue it to the client
