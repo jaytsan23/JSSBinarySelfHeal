@@ -61,6 +61,7 @@ addDate(){
 ######################## Do Not Modify Below This Line ####################################
 ########## Create New Day Line ##########
 /bin/echo "*******************************************************************************************************************************************************" >> $logFile;
+/bin/echo "" >> $logFile;
 /bin/echo "                                                    Today's Date:  $(date +"%A %B %d, %Y")                                                                           " >> $logFile;
 /bin/echo "                                                    Jamf Binary Version: $jamfVersion                                                                           " >> $logFile;
 /bin/echo "" >> $logFile;
