@@ -185,3 +185,5 @@ if [ ${number} -ge 5 ]; then
 else
 	echo "There are currently "${number}" archived logs on this client.  When we reach 5, the latest archive log will be kept as the rest will be deleted." | addDate >> $logFile;
 fi
+
+/bin/echo "" >> $logFile;
