@@ -34,3 +34,9 @@ I have tested the Self Heal process against JSS 9.96 and still seeing success wi
 ********** UPDATES **********
 
 Thanks to Sam Novak, I have added a check to view the size of the client binary.  There are reports that client machines when upgrading to 9.96 are receiving a parital/corrupt binary.  A re-enroll fixes this issues, so that has now been added to the Self Heal script as a function check.
+
+********** UPDATES **********
+Date 5-24-2017
+
+1) I have added some new changes to the Self Heal process.  I have added an echo of the jamf client binary version.  We will now see the version of the binary in the Self Heal log.
+2) I add the -noPolicy flag to the reenroll calls using the invite code.  This should help out with managed devices not trying to run enrollment complete policies when they need to be reenrolled.
