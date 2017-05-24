@@ -59,6 +59,10 @@ addDate(){
 }
 
 ######################## Do Not Modify Below This Line ####################################
+########## Create New Day Line ##########
+/bin/echo "*******************************************************************************************************************************************************" >> $logFile;
+/bin/echo "                                                    Today's Date:  $(date +"%A %B %d, %Y")                                                                           " >> $logFile;
+/bin/echo "" >> $logFile;
 
 # Create enrollLog if it doesn't exisit
 if [[ ! -f $logFile ]];
@@ -100,11 +104,6 @@ if [ $filesize -ge $max_size ]; then
 fi
 
 sleep 5
-
-########## Create New Day Line ##########
-/bin/echo "*******************************************************************************************************************************************************" >> $logFile;
-/bin/echo "                                                    Today's Date:  $(date +"%A %B %d, %Y")                                                                           " >> $logFile;
-/bin/echo "" >> $logFile;
 
 # Check to see if binary exists if not install it, if not, install the binary and eroll the client
 # Check if the binary exists and get the size in 1K blocks (should be over 5K)
