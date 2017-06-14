@@ -57,3 +57,30 @@ date: Log entry
 date: Log entry
 
 **************************************************************************************************************************
+
+UPDATE 6-14-2017:
+
+Added the following variables: 
+
+networkTimeEnabled="" # on or off
+networkTimeServer="" # ex. time.apple.com
+
+Added the following code: 
+
+# Verify Network Time Server And Set It If Needed
+currentNetworkTime=$(systemsetup getnetworktimeserver | awk '{print $4}')
+
+if [ "$networkTimeEnabled" = off ]; then
+	echo "Network time is currently turned off as expected ..." | addDate >> $logFile;
+else
+	if [ "$networkTimeServer" != "$currentNetworkTime" ]; then
+		echo "Current Network Time Server is $currentNetworkTime" | addDate >> $logFile;
+		echo "Setting Network Time Server to $networkTimeServer" | addDate >> $logFile;
+		systemsetup setnetworktimeserver $networkTimeServer ... | addDate >> $logFile;
+		sleep 2
+		currentNetworkTime=$(systemsetup getnetworktimeserver | awk '{print $4}')
+		echo "Network Time Server is now set to $currentNetworkTime ..." | addDate >> $logFile;
+	else
+		echo "Network Time Server is $networkTimeEnabled and set to $currentNetworkTime" | addDate >> $logFile;
+	fi
+fi
