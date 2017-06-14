@@ -37,6 +37,10 @@
 #       Added jamf binary size check LCV 10-28-16
 #		- Special thanks to novaksam
 #
+#	Version 3.0 by Lucas Vance
+#	Added systemsetup setnetworktimeserver
+#		- Special thanks to vijayasekharn
+#
 #####################################################################################################
 
 ####################### Variables ################################
@@ -51,6 +55,8 @@ mdmEnrollmentProfileID="00000000-0000-0000-A000-4A414D460003"
 enrolled=$(/usr/bin/profiles -P | /usr/bin/grep "$mdmEnrollmentProfileID")
 jamf_size=$(du -ks /usr/local/jamf/bin/jamf | awk '{ print $1 }')
 jamfVersion=$(/usr/local/jamf/bin/jamf version | cut -f2 -d"=" | grep -e "[0-9]")
+networkTimeEnabled="" # on or off
+networkTimeServer="" # ex. time.apple.com
 
 addDate(){
 	while IFS= read -r line; do
@@ -107,6 +113,24 @@ if [ $filesize -ge $max_size ]; then
 fi
 
 sleep 5
+
+# Verify Network Time Server And Set It If Needed
+currentNetworkTime=$(systemsetup getnetworktimeserver | awk '{print $4}')
+
+if [ "$networkTimeEnabled" = off ]; then
+	echo "Network time is currently turned off as expected ..." | addDate >> $logFile;
+else
+	if [ "$networkTimeServer" != "$currentNetworkTime" ]; then
+		echo "Current Network Time Server is $currentNetworkTime" | addDate >> $logFile;
+		echo "Setting Network Time Server to $networkTimeServer" | addDate >> $logFile;
+		systemsetup setnetworktimeserver $networkTimeServer ... | addDate >> $logFile;
+		sleep 2
+		currentNetworkTime=$(systemsetup getnetworktimeserver | awk '{print $4}')
+		echo "Network Time Server is now set to $currentNetworkTime ..." | addDate >> $logFile;
+	else
+		echo "Network Time Server is $networkTimeEnabled and set to $currentNetworkTime" | addDate >> $logFile;
+	fi
+fi
 
 # Check to see if binary exists if not install it, if not, install the binary and eroll the client
 # Check if the binary exists and get the size in 1K blocks (should be over 5K)
