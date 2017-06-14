@@ -37,7 +37,7 @@
 #       Added jamf binary size check LCV 10-28-16
 #		- Special thanks to novaksam
 #
-#	Version 3.0 by Lucas Vance
+#	Version 3.0 by Lucas Vance 6-14-2017
 #	Added systemsetup setnetworktimeserver
 #		- Special thanks to vijayasekharn
 #
