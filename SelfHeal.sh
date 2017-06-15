@@ -123,7 +123,7 @@ else
 	if [ "$networkTimeServer" != "$currentNetworkTime" ]; then
 		echo "Current Network Time Server is $currentNetworkTime" | addDate >> $logFile;
 		echo "Setting Network Time Server to $networkTimeServer" | addDate >> $logFile;
-		systemsetup setnetworktimeserver $networkTimeServer ... | addDate >> $logFile;
+		systemsetup setnetworktimeserver $networkTimeServer
 		sleep 2
 		currentNetworkTime=$(systemsetup getnetworktimeserver | awk '{print $4}')
 		echo "Network Time Server is now set to $currentNetworkTime ..." | addDate >> $logFile;
