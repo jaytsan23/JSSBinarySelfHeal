@@ -41,11 +41,16 @@
 #	Added systemsetup setnetworktimeserver
 #		- Special thanks to vijayasekharn
 #
+#	Version 4.0 by Lucas Vance @ Jamf
+#	Added verification that the client binary matches the jamf | PRO version, if not reenroll the client
+#	Added a loop to detect if a jamf enroll process is running, if it is wait until completed before continuing
+#
 #####################################################################################################
-
 ####################### Variables ################################
 jssUrl="" # ex. https://jamit.q.jamfsw.corp:8443 - Please include the port if used
 enrollInv="" # Invitation ID from a quickadd package
+networkTimeEnabled="" # on or off
+networkTimeServer="" # ex. time.apple.com
 logFile="/Users/Shared/enrollLog.log"
 check=$(/usr/local/bin/jamf checkJSSConnection | rev | cut -c 2- | rev | grep "The JSS is available")
 quickLocation="/tmp/quickadd.zip"
@@ -55,8 +60,8 @@ mdmEnrollmentProfileID="00000000-0000-0000-A000-4A414D460003"
 enrolled=$(/usr/bin/profiles -P | /usr/bin/grep "$mdmEnrollmentProfileID")
 jamf_size=$(du -ks /usr/local/jamf/bin/jamf | awk '{ print $1 }')
 jamfVersion=$(/usr/local/jamf/bin/jamf version | cut -f2 -d"=" | grep -e "[0-9]")
-networkTimeEnabled="" # on or off
-networkTimeServer="" # ex. time.apple.com
+serverBinary=$(curl -i -sk $jssUrl --include | grep -e "version" | grep "content" | sed -n -e 's/^.*content//p' | tr -dc '[:alnum:]\n\r')
+bCheck=$(/usr/local/jamf/bin/jamf version | cut -f2 -d"=" | grep -e "[0-9]" | tr -dc '[:alnum:]\n\r')
 
 addDate(){
 	while IFS= read -r line; do
@@ -113,6 +118,37 @@ if [ $filesize -ge $max_size ]; then
 fi
 
 sleep 5
+
+# Verify Client Is Not Enrolling Before Beginning Self Heal 
+while true
+psCheck=$(ps aux | grep "[j]amf enroll" | wc -l)
+do
+    if [ "$psCheck" -gt 0 ]; then
+        echo "Client is enrolling, waiting for completion ..." | addDate >> $logFile;
+        sleep 5
+    else
+        echo "Client is not enrolling, continuing Self Heal ..." | addDate >> $logFile;
+        break
+    fi
+done
+
+# Verify Client Binary Matches jamf | PRO Binary
+if [ "$bCheck" == "$serverBinary" ]; then
+	echo "Client binary matches the current version of jamf | PRO" | addDate >> $logFile;
+else
+	echo "Client binary does not match the current version of jamf | PRO" | addDate >> $logFile;
+	echo "Downloading quickadd package to re-enroll client..." | addDate >> $logFile;
+	/usr/bin/curl -sk $jssUrl/quickadd.zip > $quickLocation | addDate >> $logFile;
+	/bin/echo "Download is complete ... Unpacking the quickadd package installer to /tmp/" | addDate >> $logFile;
+	/usr/bin/unzip /tmp/quickadd.zip -d /tmp/ | addDate >> $logFile;
+	/bin/echo "Unzip is complete, now installing the JSS Binary" | addDate >> $logFile;
+	/usr/sbin/installer -dumplog -verbose -pkg /tmp/QuickAdd.pkg -target / | addDate >> $logFile;
+	/bin/echo "Installation is complete, the client should now be enrolled into the JSS" | addDate >> $logFile;
+	/bin/echo "Cleaning up quickadd package ....." | addDate >> $logFile;
+	/bin/rm -f /tmp/quickadd.zip | addDate >> $logFile;
+	/bin/rm -rf /tmp/QuickAdd.pkg | addDate >> $logFile;
+	/bin/rm -rf /tmp/_* | addDate >> $logFile;
+fi
 
 # Verify Network Time Server And Set It If Needed
 currentNetworkTime=$(systemsetup getnetworktimeserver | awk '{print $4}')
