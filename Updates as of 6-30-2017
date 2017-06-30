@@ -84,3 +84,46 @@ else
 		echo "Network Time Server is $networkTimeEnabled and set to $currentNetworkTime" | addDate >> $logFile;
 	fi
 fi
+
+**************************************************************************************************************************
+
+UPDATE 6-30-2017:
+
+Added the following functions:
+
+1) Added a loop to check if the client is currently enrolling into jamf | PRO.  If a jamf enroll process is found, the self heal process will stay in a loop until no enrollment is detected and the Self Heal will continue on
+
+2) Add a verification that checks the client binary and ensures that it's the same version as the jamf | PRO server
+
+Added the following code: 
+
+# Verify Client Is Not Enrolling Before Beginning Self Heal 
+while true
+psCheck=$(ps aux | grep "[j]amf enroll" | wc -l)
+do
+    if [ "$psCheck" -gt 0 ]; then
+        echo "Client is enrolling, waiting for completion ..." | addDate >> $logFile;
+        sleep 5
+    else
+        echo "Client is not enrolling, continuing Self Heal ..." | addDate >> $logFile;
+        break
+    fi
+done
+
+# Verify Client Binary Matches jamf | PRO Binary
+if [ "$bCheck" == "$serverBinary" ]; then
+	echo "Client binary matches the current version of jamf | PRO" | addDate >> $logFile;
+else
+	echo "Client binary does not match the current version of jamf | PRO" | addDate >> $logFile;
+	echo "Downloading quickadd package to re-enroll client..." | addDate >> $logFile;
+	/usr/bin/curl -sk $jssUrl/quickadd.zip > $quickLocation | addDate >> $logFile;
+	/bin/echo "Download is complete ... Unpacking the quickadd package installer to /tmp/" | addDate >> $logFile;
+	/usr/bin/unzip /tmp/quickadd.zip -d /tmp/ | addDate >> $logFile;
+	/bin/echo "Unzip is complete, now installing the JSS Binary" | addDate >> $logFile;
+	/usr/sbin/installer -dumplog -verbose -pkg /tmp/QuickAdd.pkg -target / | addDate >> $logFile;
+	/bin/echo "Installation is complete, the client should now be enrolled into the JSS" | addDate >> $logFile;
+	/bin/echo "Cleaning up quickadd package ....." | addDate >> $logFile;
+	/bin/rm -f /tmp/quickadd.zip | addDate >> $logFile;
+	/bin/rm -rf /tmp/QuickAdd.pkg | addDate >> $logFile;
+	/bin/rm -rf /tmp/_* | addDate >> $logFile;
+fi
