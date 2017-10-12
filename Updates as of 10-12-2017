@@ -127,3 +127,7 @@ else
 	/bin/rm -rf /tmp/QuickAdd.pkg | addDate >> $logFile;
 	/bin/rm -rf /tmp/_* | addDate >> $logFile;
 fi
+
+10-12-2017
+
+I have confirmed that the Self Heal tool is still compatible with Jamf Pro 10.  
