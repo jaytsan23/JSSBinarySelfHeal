@@ -131,3 +131,7 @@ fi
 10-12-2017
 
 I have confirmed that the Self Heal tool is still compatible with Jamf Pro 10.  
+
+02-15-2018
+
+I am currently working on a new solution to no longer use a QuickAdd package.  I have successfully tested this, but will need to incorporate a solution to use encrypted strings to protect user accounts and passwords.  I am ironing out some details there, but will have this update in place very soon.
