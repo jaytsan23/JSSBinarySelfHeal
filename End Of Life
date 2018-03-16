@@ -1,0 +1,3 @@
+I will no longer be offering support for this Self Heal application.  Due to the new User Approved MDM additions to 
+10.13, this is no longer a good tool to be running on client machines.  This tool will break the User Approved status 
+of MDM which will break user level profiles and the ability to install VPP apps.  Sorry for the inconvenience.
